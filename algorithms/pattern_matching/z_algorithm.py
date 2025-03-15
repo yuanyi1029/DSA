@@ -24,11 +24,11 @@ def z_algorithm(sentence):
             # Case 2c: corresponding z-value is equal to the z-box
             # Resolve: perform manual comparison from right onwards 
             else:
-                start = right - index + 2 
+                start = right - index + 1 
                 current = right + 1   
                 matches = right - index + 1
 
-                while sentence[start] == sentence[current]: 
+                while current < len(sentence) and sentence[start] == sentence[current]: 
                     start += 1 
                     current += 1 
                     matches += 1 
@@ -46,7 +46,7 @@ def z_algorithm(sentence):
             current = index
             matches = 0 
 
-            while sentence[start] == sentence[current]: 
+            while current < len(sentence) and sentence[start] == sentence[current]: 
                 start += 1 
                 current += 1
                 matches += 1  
@@ -62,5 +62,4 @@ def z_algorithm(sentence):
     return z_array
 
 if __name__ == "__main__":
-    word = "aabxaabxcaabxaabxay"
-    print(z_algorithm(word))
+    pass
