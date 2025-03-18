@@ -46,13 +46,18 @@ def generate_matched_prefix_array(pattern):
     array.append(0)    
     return array
 
-def boyer_moore(pattern, sentence): 
+def boyer_moore(sentence, pattern): 
     matched_array = []
     bad_character_table = generate_bad_character_table(pattern)
     good_suffix_array = generate_good_suffix_array(pattern) 
     matched_prefix_array = generate_matched_prefix_array(pattern)
 
     index = 0 
+    bad_character_shift = 0
+    good_suffix_shift = 0 
+    start = None
+    end = None 
+
     while (index + len(pattern)) <= len(sentence): 
         # Right to left scanning 
         current_sentence_index = index + len(pattern) - 1 
@@ -60,7 +65,11 @@ def boyer_moore(pattern, sentence):
 
         number_of_matches = 0
         while current_pattern_index >= 0: 
-            
+            if (good_suffix_shift >= bad_character_shift) and (end is not None and current_pattern_index == end): 
+                current_sentence_index = current_sentence_index - (end - start + 1)
+                current_pattern_index = start - 1 
+                number_of_matches += end - start + 1
+                continue
             if sentence[current_sentence_index] == pattern[current_pattern_index]: 
                 number_of_matches += 1 
             else: 
@@ -70,10 +79,14 @@ def boyer_moore(pattern, sentence):
             current_sentence_index -= 1 
             current_pattern_index -= 1   
 
+        start = None 
+        end = None 
         if number_of_matches == len(pattern): 
             matched_array.append(index) 
             matched_prefix_index = matched_prefix_array[1]
             index += len(pattern) - matched_prefix_index
+            start = 0
+            end = matched_prefix_index - 1
 
         else: 
             # Check bad character shifts 
@@ -95,36 +108,57 @@ def boyer_moore(pattern, sentence):
             good_suffix_index = good_suffix_array[current_pattern_index + 1]
             if good_suffix_index is not None: 
                 good_suffix_shift = len(pattern) - good_suffix_index - 1
+                if number_of_matches > 0: 
+                    start = current_pattern_index - good_suffix_shift + 1  
+                    end = start + number_of_matches - 1    
             else: 
                 matched_prefix_index = matched_prefix_array[current_pattern_index + 1]
                 good_suffix_shift = len(pattern) - matched_prefix_index 
+                start = 0 
+                end = matched_prefix_index - 1
 
             index += max(bad_character_shift, good_suffix_shift)
 
     return matched_array
 
 if __name__ == "__main__": 
-    # [2, 7, 10, 13]
-    sentence = "ababcababcabcabc"  
-    pattern = "abc"               
-    print(boyer_moore(pattern, sentence))
+    pass
+    # # [2, 7, 10, 13]
+    # sentence = "ababcababcabcabc"  
+    # pattern = "abc"               
+    # print(boyer_moore(sentence, pattern))
 
-    # [0, 1, 2, 3]
-    sentence = "aaaaaa"  
-    pattern = "aaa"               
-    print(boyer_moore(pattern, sentence))
+    # # [0, 1, 2, 3]
+    # sentence = "aaaaaa"  
+    # pattern = "aaa"               
+    # print(boyer_moore(sentence, pattern))
     
-    # [2, 8, 14]
-    sentence = "xxabcxxxabcxxxabc"  
-    pattern = "abc"               
-    print(boyer_moore(pattern, sentence))
+    # # [2, 8, 14]
+    # sentence = "xxabcxxxabcxxxabc"  
+    # pattern = "abc"               
+    # print(boyer_moore(sentence, pattern))
     
-    # [0, 4, 8, 12]
-    sentence = "acgtacgtacgtacgt"  
-    pattern = "acgt"               
-    print(boyer_moore(pattern, sentence))
+    # # [0, 4, 8, 12]
+    # sentence = "acgtacgtacgtacgt"  
+    # pattern = "acgt"               
+    # print(boyer_moore(sentence, pattern))
     
-    # [8]
-    sentence = "aabacabazabacabacabaa"  
-    pattern = "zabacabacaba"               
-    print(boyer_moore(pattern, sentence))
+    # # [8]
+    # sentence = "aabacabazabacabacabaa"  
+    # pattern = "zabacabacaba"               
+    # print(boyer_moore(sentence, pattern))
+    
+    # # Test
+    # sentence = "xpbctbxabacbxtbpqa"  
+    # pattern = "tbapxab"               
+    # print(boyer_moore(sentence, pattern))
+    
+    # # [] Good Suffix Test 
+    # sentence = "aabacabazabacabacabaa"  
+    # pattern = "aabazabacaba"               
+    # print(boyer_moore(sentence, pattern))
+    
+    # # [1, 5] Galil's Optimization Test 
+    # sentence = "axyzaxyza"  
+    # pattern = "xyz"               
+    # print(boyer_moore(sentence, pattern))
